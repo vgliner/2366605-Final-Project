@@ -5,6 +5,8 @@ import scipy.io as sio
 import numpy as np
 import pandas as pd
 import os
+import pickle
+
 
 #%% Chineese challenge
 def Upload_db_records(DB_path, plot_flag=True):
@@ -49,13 +51,39 @@ def split_records(ECG_raw):
     number_of_output_records=np.ceil(num_of_seconds_in_record/2.5)
     for record_cntr in range(int(number_of_output_records)-1):
         # Scale and quantize the records
-        Relevant_Data=ECG_raw[:,(record_cntr)*Fs:(record_cntr+1)*Fs]
+        Relevant_Data=ECG_raw[:,int(2.5*(record_cntr)*Fs):int(2.5*(record_cntr+1)*Fs)]
         Scaled_data=(Relevant_Data-Relevant_Data.min())/(Relevant_Data.max()-Relevant_Data.min())
         print('Here')
     # Return tuple of (2.5 sec X 12 lead matrix + one strip of 10 records)
-    return
+    return 
+
+def unpickle_CIFAR_dataset(file):
+    """ Upolading CIFAR hust to see 2the convention
+    data -- a 10000x3072 numpy array of uint8s. Each row of the array stores a 32x32 colour image. The first 1024 entries contain the red channel values, the next 1024 the green, and the final 1024 the blue. The image is stored in row-major order, so that the first 32 entries of the array are the red channel values of the first row of the image.
+    labels -- a list of 10000 numbers in the range 0-9. The number at index i indicates the label of the ith image in the array data.
+    
+    """    
+    with open(file, 'rb') as fo:
+        dict = pickle.load(fo, encoding='bytes')
+    return dict
+
+
+
+def pickle_ECG_data(ECG_data):
+    with open('ECG_data.pkl','wb') as fo:
+        pickle.dump(ECG_data,fo,-1) # Pickling with th highest protocol available
+    
+def unpickle_ECG_data(file='ECG_data.pkl'):
+    with open(file, 'rb') as fo:
+        pickled_data = pickle.load(fo, encoding='bytes')
+    print(f'Loaded data with type of: {type(pickled_data)}')
+    return pickled_data    
 
 #%% Main loop
+returned_dict=unpickle_CIFAR_dataset(r'C:\Users\vgliner\AppData\Local\Temp\1\cifar-10-python\cifar-10-batches-py\data_batch_1')
+# Pickle test
+pickle_ECG_data('Vadim')
+unpickle_ECG_data()
 cwd = os.getcwd()
 DB_path=cwd+r'\Data\Original\Chineese'+'\\'
 titles=['Lead1','Lead2','Lead3','aVR','aVL','aVF','V1','V2','V3','V4','V5','V6']
