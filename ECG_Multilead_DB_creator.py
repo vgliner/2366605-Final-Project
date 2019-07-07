@@ -8,9 +8,11 @@ import os
 import pickle
 
 
+
 #%% Chineese challenge
 def Upload_db_records(DB_path, plot_flag=True):
     db_splitted_records=[]
+    records_per_file=4000
     for file in glob.glob("*.mat"):
         print(file)
         mat_contents = sio.loadmat(DB_path+file)
@@ -30,11 +32,14 @@ def Upload_db_records(DB_path, plot_flag=True):
         splitted_records=split_records(B)
         if splitted_records==-1:
             continue
-        ## Splitting to a stnadard records
+        ## Splitting to a standard records
         for splitted_record in splitted_records:
             db_splitted_records.append((splitted_record,classification))
-
-    pickle_ECG_data(db_splitted_records)
+    for file_num in range(len(db_splitted_records)//records_per_file+1):
+        max_storage_value=min([len(db_splitted_records),(file_num+1)*records_per_file])
+        filename=r'C:\Users\vgliner\OneDrive - JNJ\Desktop\Data\Chinese_db'+str(file_num)+'.pkl'
+        pickle_ECG_data(db_splitted_records[file_num*records_per_file:max_storage_value],file=filename)
+        print(f'Pickled: file Chinese_db_{file_num}.pkl')
     print(f'Created {len(db_splitted_records)} records')
     return db_splitted_records
 
@@ -108,8 +113,8 @@ def unpickle_CIFAR_dataset(file):
 
 
 
-def pickle_ECG_data(ECG_data):
-    with open('ECG_data.pkl','wb') as fo:
+def pickle_ECG_data(ECG_data, file=r'C:\Users\vgliner\OneDrive - JNJ\Desktop\ECG_data.pkl'):
+    with open(file,'wb') as fo:
         pickle.dump(ECG_data,fo,-1) # Pickling with the highest protocol available
     
 def unpickle_ECG_data(file='ECG_data.pkl'):
@@ -119,10 +124,10 @@ def unpickle_ECG_data(file='ECG_data.pkl'):
     return pickled_data    
 
 #%% Main loop
-returned_dict=unpickle_CIFAR_dataset(r'data_batch_1')
+# returned_dict=unpickle_CIFAR_dataset(r'data_batch_1')
 # Pickle test
-pickle_ECG_data('Vadim')
-unpickle_ECG_data()
+# pickle_ECG_data('Vadim')
+# unpickle_ECG_data()
 cwd = os.getcwd()
 DB_path=cwd+r'\Data\Original\Chineese'+'\\'
 DB_path=r'C:\Users\vgliner\OneDrive - JNJ\Desktop\Private\PhD\Work\SW\Chinese Challenge\Data - Original'+'\\'
