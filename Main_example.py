@@ -15,7 +15,7 @@ tf_ds = tvtf.Compose([
     tf.ECG_tuple_transform(-1) # Reshape to 1D Tensor
 ])
 
-ECG_test=ECG_Multilead_Dataset(root_dir=os.getcwd()+'\\Chineese_database\\',transform= tf_ds) # For KNN demo
+ECG_test=ECG_Multilead_Dataset(root_dir=r'C:\Users\vgliner\OneDrive - JNJ\Desktop\Data'+'\\',transform= tf_ds) # For KNN demo
 ########   Example how to access the data (Uncomment if necessary) ##############
 # ECG_test=ECG_Multilead_Dataset(root_dir=os.getcwd()+'\\Chineese_database\\',transform=None) # For access demo
 # sample_test=ECG_test[2] #Taking for example record number 2 (Starting from zero)
