@@ -8,8 +8,15 @@
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
+            "program": "${workspaceFolder}\\Main_ECG_renderer_example.py",
             "console": "integratedTerminal"
         }
+        // {
+        //     "name": "Python: Current File",
+        //     "type": "python",
+        //     "request": "launch",
+        //     "program": "${Main_ECG_renderer_example.py}",
+        //     "console": "integratedTerminal"
+        // }
     ]
 }
