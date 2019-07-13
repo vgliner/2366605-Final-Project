@@ -45,7 +45,5 @@ def draw_ECG_multilead_vanilla(ECG_info: tuple):
     ax = fig.gca()
     canvas.draw()       # draw the canvas, cache the renderer
     s, (width, height) = canvas.print_to_buffer()
-    X = np.fromstring(s, np.uint8).reshape((height, width, 4))  
-    
-    return X
-
+    X = np.fromstring(s, np.uint8).reshape((height, width, 4))  # The format is RGBA (A- alpha)
+    return X[:,:,0:3]
