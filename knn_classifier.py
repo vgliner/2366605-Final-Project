@@ -35,7 +35,6 @@ class KNNClassifier(object):
         # Calculate distances between training and test samples
         dist_matrix = self.calc_distances(x_test)
 
-        # TODO: Implement k-NN class prediction based on distance matrix.
         # For each training sample we'll look for it's k-nearest neighbors.
         # Then we'll predict the label of that sample to be the majority
         # label of it's nearest neighbors.
@@ -44,7 +43,6 @@ class KNNClassifier(object):
         y_pred = torch.zeros(n_test, dtype=torch.int64)
 
         for i in range(n_test):
-            # TODO:
             # - Find indices of k-nearest neighbors of test sample i
             # - Set y_pred[i] to the most common class among them
 
@@ -77,7 +75,6 @@ class KNNClassifier(object):
             between training sample i and test sample j.
         """
 
-        # TODO: Implement L2-distance calculation as efficiently as possible.
         # Notes:
         # - Use only basic pytorch tensor operations, no external code.
         # - No credit will be given for an implementation with two explicit
@@ -123,7 +120,7 @@ def accuracy(y: Tensor, y_pred: Tensor):
     assert y.shape == y_pred.shape
     assert y.dim() == 1
 
-    # TODO: Calculate prediction accuracy. Don't use an explicit loop.
+
 
     accuracy = None
     acc = y.int() - y_pred.int()
@@ -152,7 +149,7 @@ def find_best_k(ds_train: Dataset, k_choices, num_folds):
     for i, k in enumerate(k_choices):
         model = KNNClassifier(k)
 
-        # TODO: Train model num_folds times with different train/val data.
+        # Train model num_folds times with different train/val data.
         # Don't use any third-party libraries.
         # You can use your train/validation splitter from part 1 (even if
         # that means that it's not really k-fold CV since it will be a
