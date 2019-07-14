@@ -1,0 +1,9 @@
+# How to manage a ToDo: https://marketplace.visualstudio.com/items?itemName=fabiospampinato.vscode-todo-plus
+
+
+Todo:
+  ☐ Improve the parsing of the Chinese database so the leads will be correspondent to time frame
+  ☐ Add additional types of rendering - not just the red one
+  ☐ Fix existing database- > Unsqueeze to long lead
+  ☐ Create a new database: Rendered image to class @high 
+  ☐ Create a new database: Rendered image to digitized matrix

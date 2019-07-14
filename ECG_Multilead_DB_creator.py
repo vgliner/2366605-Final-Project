@@ -96,7 +96,7 @@ def split_records(ECG_raw):
             Scaled_data=(Scaled_data*(2**bit_encoding-1)).astype(int)
             Scaled_data_long_lead=(Scaled_data_long_lead*(2**bit_encoding-1)).astype(int)
 
-        results_list.append((Scaled_data,Scaled_data_long_lead))
+        results_list.append((Scaled_data,np.expand_dims(Scaled_data_long_lead,axis=0)))
         #print(f'Record number {record_cntr} out of  {number_of_output_records} , long record length {len(Long_lead_recording)}, total : {len(ECG_raw[0,:])}')
     # Return tuple of (2.5 sec X 12 lead matrix + one strip of 10 records)
     return results_list
