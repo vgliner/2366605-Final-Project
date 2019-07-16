@@ -75,15 +75,6 @@ class KNNClassifier(object):
             between training sample i and test sample j.
         """
 
-        # Notes:
-        # - Use only basic pytorch tensor operations, no external code.
-        # - No credit will be given for an implementation with two explicit
-        #   loops.
-        # - Partial credit will be given for an implementation with only one
-        #   explicit loop.
-        # - Full credit will be given for a fully vectorized implementation
-        #   (zero explicit loops). Hint: Open the expression (a-b)^2.
-
         dists = torch.tensor([])
         # ====== YOUR CODE: ======
         # Get the dimensions of each matrix

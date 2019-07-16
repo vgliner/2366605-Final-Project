@@ -16,7 +16,8 @@ class ECG_tuple_transform(object):
             np.shape(ECG_tuple[0][0])
             the_object=ECG_tuple[0][0]
             the_object=np.ndarray.flatten(the_object)
-            the_object=np.concatenate((the_object,ECG_tuple[0][1]),axis=0)
+            A=np.squeeze(ECG_tuple[0][1])
+            the_object=np.concatenate((the_object,A),axis=0)
             # the_object=np.expand_dims(the_object,axis=0)
             # the_object=np.expand_dims(the_object,axis=0)
             reshaped_vector=(the_object,ECG_tuple[1])

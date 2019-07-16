@@ -4,25 +4,25 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        // {
-        //     "name": "Python: Current File",
-        //     "type": "python",
-        //     "request": "launch",
-        //     "program": "${file}",
-        //     "console": "integratedTerminal"
-        // },
         {
-            "name": "Renderer",
+            "name": "Python: Current File",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}\\Main_ECG_renderer_example.py",
+            "program": "${file}",
             "console": "integratedTerminal"
-        }
+        }//,
         // {
-        //     "name": "ECG_Multilead_DB_creator",
+        //     "name": "Renderer",
         //     "type": "python",
         //     "request": "launch",
-        //     "program": "${workspaceFolder}\\ECG_Multilead_DB_creator.py",
+        //     "program": "${workspaceFolder}\\ECG_Rendered_DB_creator.py",
+        //     "console": "integratedTerminal"
+        // }
+        // {
+        //     "name": "Renderer loader",
+        //     "type": "python",
+        //     "request": "launch",
+        //     "program": "${workspaceFolder}\\Main_example rendered database.py",
         //     "console": "integratedTerminal"
         // }
     ]
