@@ -15,21 +15,23 @@ import os
 
 # Define the transforms that should be applied to each ECG record before returning it
 tf_ds = tvtf.Compose([
-    tf.ECG_tuple_transform(-1) # Reshape to 1D Tensor
+    tf.ECG_rendering_transform(-1) # Reshape to 1D Tensor
 ])
 
-ECG_test=ECG_Rendered_Multilead_Dataset(root_dir=r'C:\Users\vgliner\OneDrive - JNJ\Desktop\Data\Rendering_to_class_db'+'\\',
-    transform= None,partial_upload=True) # For KNN demo
+
 ########   Example how to access the data (Uncomment if necessary) ##############
-sample_test=ECG_test[2] #Taking for example record number 2 (Starting from zero)
-print(f'Size of an image of the data of 12 leads :{np.shape(sample_test[0])}')
-print(f'Is the example record AFIB: {sample_test[1]}')
-plt.imshow(sample_test[0])
-plt.show()
+# ECG_test=ECG_Rendered_Multilead_Dataset(root_dir=r'C:\Users\vgliner\OneDrive - JNJ\Desktop\Data\Rendering_to_class_db'+'\\',
+#     transform= None,partial_upload=True) # For KNN demo
+# sample_test=ECG_test[2] #Taking for example record number 2 (Starting from zero)
+# print(f'Size of an image of the data of 12 leads :{np.shape(sample_test[0])}')
+# print(f'Is the example record AFIB: {sample_test[1]}')
+# plt.imshow(sample_test[0])
+# plt.show()
 
 
 
-
+ECG_test=ECG_Rendered_Multilead_Dataset(root_dir=r'C:\Users\vgliner\OneDrive - JNJ\Desktop\Data\Rendering_to_class_db'+'\\',
+    transform= tf_ds,partial_upload=True) # For KNN demo
 
 # Define how much data to load (only use a subset for speed)
 num_train = 900

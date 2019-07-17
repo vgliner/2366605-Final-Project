@@ -89,12 +89,12 @@ class KNNClassifier(object):
         test = torch.pow(x_test, 2)
         
         ones = torch.ones((train_shape[1], test_shape[0]),dtype=torch.float64)
-        train = torch.mm(train, ones)
+        train = torch.mm(train.double(), ones)
         
         ones = torch.ones((test_shape[1], train_shape[0]),dtype=torch.float64)
-        test = torch.t(torch.mm(test, ones))
+        test = torch.t(torch.mm(test.double(), ones.double()))
         
-        dists = train + test + addition_term
+        dists = train.double() + test.double() + addition_term.double()
         # ========================
         
         return dists
