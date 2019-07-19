@@ -13,19 +13,25 @@ Current_image=draw_ECG_multilead_vanilla(ECG_test[1459][0]) #369
 K=find_image_frames(Current_image)
 plt.imshow(Current_image[K[2]:K[3],K[0]:K[1]-200,:])
 plt.show()
-for cntr in range(38001,len(ECG_test)):  #len(ECG_test)
+for cntr in range(0,1001):  #len(ECG_test)
     Current_image=draw_ECG_multilead_vanilla(ECG_test[cntr][0])
     ECG_Classified_Rendered.append((Current_image[K[2]:K[3],K[0]:K[1]-200,:],ECG_test[cntr][1]))
     print(f'Processed image number {cntr} with shape of {np.shape(Current_image)}')
     try:
         if (cntr>0) and (cntr % pickle_every==0):
-            print('Writing fo file...')
+            print(f'Writing fo file..., counter is {cntr}')
             pickle_ECG_data(ECG_Classified_Rendered[-pickle_every:],Pickle_path+'Rendered_data'+str(cntr // pickle_every)+'.pkl')
             ECG_Classified_Rendered=[]
             last_cntr = cntr
+
+        if ((cntr+1) // len(ECG_test)):
+            print(f'Writing fo file..., counter is {cntr}')
+            pickle_ECG_data(ECG_Classified_Rendered[-pickle_every:],Pickle_path+'Rendered_data'+str(cntr // pickle_every +1)+'.pkl')
+            ECG_Classified_Rendered=[]
+            last_cntr = cntr                    
     except:
         if (cntr>0) and (cntr % pickle_every==0):
-            print('Writing fo file...')
+            print(f'Writing fo file..., counter is {cntr}')
             pickle_ECG_data(ECG_Classified_Rendered[-pickle_every:],Pickle_path+'Rendered_data'+str(cntr // pickle_every)+'.pkl')
             ECG_Classified_Rendered=[]
             last_cntr = cntr        

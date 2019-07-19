@@ -38,7 +38,6 @@ class ECG_rendering_transform(object):
 
     def __call__(self, ECG_tuple):
         if self.view_dims[0]==-1:
-            np.shape(ECG_tuple[0])
             the_object=ECG_tuple[0]
             the_object=np.ndarray.flatten(the_object)
             reshaped_vector=np.squeeze(the_object)

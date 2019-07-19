@@ -11,6 +11,8 @@ class ECG_Rendered_Multilead_Dataset(Dataset):
         self.data=[]
         self.data_info=[]
         self.transform= transform
+        self.last_chunk_uploaded_to_memory=1
+        self.partial_upload=partial_upload
 
 
         if root_dir== None:
@@ -21,27 +23,36 @@ class ECG_Rendered_Multilead_Dataset(Dataset):
         for indx, file in enumerate(glob.glob(self.dataset_path+"*.pkl")):
             unpickled_data=self.unpickle_ECG_data(file=file)
             list_shape=np.shape(unpickled_data)
-            if len(list_shape)>1:
-                self.data=self.data+unpickled_data
-            else:
-                self.data_info.append(unpickled_data)
-            
-            if (partial_upload) and (indx==0):
+            self.samples=unpickled_data
+            if  (indx==0): # (partial_upload) and
                 break
-        self.samples = self.data
-        data=[d[0] for d in self.data]
-        self.data=data
-        self.target=[d[1] for d in self.data]
-        print(f'Uploaded data, size of {np.shape(self.data)}')
+        print(f'Uploaded data, size of {np.shape(self.samples)}')
 
     def __len__(self):
-        return len(self.samples)
+        if self.partial_upload:
+            return len(self.samples)
+        else:
+            return 41830
 
     def __getitem__(self, idx):
-        if self.transform:
-            return self.transform(self.samples[idx])
-        return self.samples[idx]
-
+        chunk_number=idx//1000+1
+        print(f'Debug, called with index {idx}')   
+        if chunk_number==self.last_chunk_uploaded_to_memory:
+            if self.transform:
+                sample=self.transform(self.samples[idx %1000])
+            else:
+                sample=self.samples[idx % 1000]
+            return sample
+        else:
+            file=self.dataset_path+'Rendered_data'+str(max(1,idx//1000+1))+'.pkl'
+            unpickled_data=self.unpickle_ECG_data(file=file)
+            self.last_chunk_uploaded_to_memory=max(1,idx//1000+1)
+            self.samples=unpickled_data
+            if self.transform:
+                sample=self.transform(self.samples[idx % 1000])
+            else:
+                sample=self.samples[idx % 1000]
+            return sample
 
     def unpickle_ECG_data(self,file='ECG_data.pkl'):
         with open(file, 'rb') as fo:
