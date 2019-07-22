@@ -20,9 +20,9 @@ tf_ds = tvtf.Compose([
 
 
 ########   Example how to access the data (Uncomment if necessary) ##############
-# ECG_test=ECG_Rendered_Multilead_Dataset(root_dir=r'C:\Users\vgliner\OneDrive - JNJ\Desktop\Data\Rendering_to_class_db'+'\\',
-#     transform= None,partial_upload=True) # For KNN demo
-# sample_test=ECG_test[2] #Taking for example record number 2 (Starting from zero)
+#ECG_test=ECG_Rendered_Multilead_Dataset(root_dir=r'C:\Users\vgliner\OneDrive - JNJ\Desktop\Data\Rendering_to_class_db'+'\\',
+#    transform= None,partial_upload=True) # For KNN demo
+#sample_test=ECG_test[2] #Taking for example record number 2 (Starting from zero)
 # print(f'Size of an image of the data of 12 leads :{np.shape(sample_test[0])}')
 # print(f'Is the example record AFIB: {sample_test[1]}')
 # plt.imshow(sample_test[0])

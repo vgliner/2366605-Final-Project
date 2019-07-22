@@ -1,6 +1,10 @@
 import pickle
 
 
+# Flags
+PRINT_FLAG = False
+
+
 
 def pickle_ECG_data(ECG_data, file=r'C:\Users\vgliner\OneDrive - JNJ\Desktop\ECG_data.pkl'):
     with open(file,'wb') as fo:
@@ -9,8 +13,9 @@ def pickle_ECG_data(ECG_data, file=r'C:\Users\vgliner\OneDrive - JNJ\Desktop\ECG
 def unpickle_ECG_data(file='ECG_data.pkl'):
     with open(file, 'rb') as fo:
         pickled_data = pickle.load(fo, encoding='bytes')
-    print(f'Loaded data with type of: {type(pickled_data)}')
-    return pickled_data    
+        if PRINT_FLAG:
+                print(f'Loaded data with type of: {type(pickled_data)}')
+        return pickled_data    
 
 
 def unpickle_CIFAR_dataset(file):

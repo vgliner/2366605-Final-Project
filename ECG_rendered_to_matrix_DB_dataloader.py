@@ -4,7 +4,7 @@ import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 
-class ECG_Rendered_Multilead_Dataset(Dataset):
+class ECG_Rendered_to_matrix_Dataset(Dataset):
     # Convention   [n , height, width, color channel] 
     def __init__(self, root_dir= None, transform = None, partial_upload=False):
         super().__init__()
@@ -32,7 +32,7 @@ class ECG_Rendered_Multilead_Dataset(Dataset):
         if self.partial_upload:
             return len(self.samples)
         else:
-            return 41830
+            return 41829
 
     def __getitem__(self, idx):
         chunk_number=idx//1000+1
@@ -61,10 +61,23 @@ class ECG_Rendered_Multilead_Dataset(Dataset):
 
 
     def plot(self,idx):
-        #TODO : Implement plot
         item_to_show=self.__getitem__(idx)
+        ax1=plt.subplot(211)
         plt.imshow(item_to_show[0])
+        ax2=plt.subplot(223)
+        plt.imshow(item_to_show[1][0])
+        ax3=plt.subplot(224)
+        plt.plot(np.squeeze(item_to_show[1][1]))
+        ax1.title.set_text('Image')
+        ax2.title.set_text('Matrix')
+        ax3.title.set_text('Long lead')
         plt.show()
         return
 
 
+if __name__ == "__main__":
+    print('Main is running')
+    Rendered_to_matrix_db_path=r'C:\Users\vgliner\OneDrive - JNJ\Desktop\Data\Rendering_to_matrix_db'+'\\'
+    ECG_test=ECG_Rendered_to_matrix_Dataset(root_dir=Rendered_to_matrix_db_path,transform=None)
+    for sample_cntr in range(4):
+        ECG_test.plot(sample_cntr)
