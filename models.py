@@ -71,7 +71,12 @@ class Ecg12LeadNet(nn.Module):
             layers.append(nn.Linear(in_dim, out_dim))
             layers.append(nn.ReLU())
             in_dim = out_dim
-        layers.append(nn.Linear(in_dim, num_of_classes))
+
+        # single score for binary classification, class score for multi-class
+        if num_of_classes == 2:
+            layers.append(nn.Linear(in_dim, 1))
+        else:
+            layers.append(nn.Linear(in_dim, num_of_classes))
 
         self.fc = nn.Sequential(*layers)
 
