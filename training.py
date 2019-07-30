@@ -253,3 +253,34 @@ class Ecg12LeadNetTrainerBinary(Trainer):
             # num_correct = torch.sum(torch.argmax(out, dim=1) == y)
 
         return BatchResult(loss.item(), num_correct.item())
+
+
+class Ecg12LeadImageNetTrainerBinary(Trainer):
+
+    def train_batch(self, batch) -> BatchResult:
+        x, y = batch
+        x = x.transpose(1, 2).transpose(1, 3).to(self.device, dtype=torch.float)
+        y = y.to(self.device, dtype=torch.float)
+
+        self.optimizer.zero_grad()
+
+        out = self.model(x).flatten()
+        loss = self.loss_fn(out, y)
+        loss.backward()
+        self.optimizer.step()
+
+        num_correct = torch.sum((out > 0) == (y == 1))
+
+        return BatchResult(loss.item(), num_correct.item())
+
+    def test_batch(self, batch) -> BatchResult:
+        x, y = batch
+        x = x.transpose(1, 2).transpose(1, 3).to(self.device, dtype=torch.float)
+        y = y.to(self.device, dtype=torch.float)
+
+        with torch.no_grad():
+            out = self.model(x).flatten()
+            loss = self.loss_fn(out, y)
+            num_correct = torch.sum((out > 0) == (y == 1))
+
+        return BatchResult(loss.item(), num_correct.item())
