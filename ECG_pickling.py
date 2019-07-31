@@ -7,14 +7,15 @@ PRINT_FLAG = False
 
 
 def pickle_ECG_data(ECG_data, file=r'C:\Users\vgliner\OneDrive - JNJ\Desktop\ECG_data.pkl'):
-    with open(file,'wb') as fo:
-        pickle.dump(ECG_data,fo,-1) # Pickling with the highest protocol available
-    
+    with open(file, 'wb') as fo:
+        pickle.dump(ECG_data, fo, -1)  # Pickling with the highest protocol available
+
+
 def unpickle_ECG_data(file='ECG_data.pkl'):
     with open(file, 'rb') as fo:
         pickled_data = pickle.load(fo, encoding='bytes')
         if PRINT_FLAG:
-                print(f'Loaded data with type of: {type(pickled_data)}')
+            print(f'Loaded data with type of: {type(pickled_data)}')
         return pickled_data    
 
 

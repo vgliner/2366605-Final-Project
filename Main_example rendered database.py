@@ -1,7 +1,5 @@
-#TODO: Adjust the file to fit the actual database
-
-
-#%% ECG Chineese Database tester  
+# TODO: Adjust the file to fit the actual database
+# %% ECG Chineese Database tester
 import sklearn as sk
 import matplotlib.pyplot as plt
 import torchvision.transforms as tvtf
@@ -20,19 +18,17 @@ tf_ds = tvtf.Compose([
 
 
 ########   Example how to access the data (Uncomment if necessary) ##############
-#ECG_test=ECG_Rendered_Multilead_Dataset(root_dir=r'C:\Users\vgliner\OneDrive - JNJ\Desktop\Data\Rendering_to_class_db'+'\\',
+# ECG_test=ECG_Rendered_Multilead_Dataset(root_dir=r'C:\Users\vgliner\OneDrive - JNJ\Desktop\Data\Rendering_to_class_db'+'\\',
 #    transform= None,partial_upload=True) # For KNN demo
-#sample_test=ECG_test[2] #Taking for example record number 2 (Starting from zero)
+# sample_test=ECG_test[2] #Taking for example record number 2 (Starting from zero)
 # print(f'Size of an image of the data of 12 leads :{np.shape(sample_test[0])}')
 # print(f'Is the example record AFIB: {sample_test[1]}')
 # plt.imshow(sample_test[0])
 # plt.show()
 
-
-
-ECG_test=ECG_Rendered_Multilead_Dataset(root_dir=r'C:\Users\vgliner\OneDrive - JNJ\Desktop\Data\Rendering_to_class_db'+'\\',
-    transform= tf_ds,partial_upload=False) # For KNN demo
-K=ECG_test[10]
+root_dir = r'C:\Users\vgliner\OneDrive - JNJ\Desktop\Data\Rendering_to_class_db' + r'\\'
+ECG_test = ECG_Rendered_Multilead_Dataset(root_dir=root_dir, transform=tf_ds, partial_upload=False)  # For KNN demo
+K = ECG_test[10]
 
 print('Managed to upload the sample # 10')
 
@@ -41,12 +37,12 @@ num_test = 200
 batch_size = 800
 
 # Training dataset & loader
-ds_train = tf.SubsetDataset(ECG_test, num_train)  #(train=True, transform=tf_ds)
-dl_train = torch.utils.data.DataLoader(ds_train,batch_size= batch_size,shuffle=False)
+ds_train = tf.SubsetDataset(ECG_test, num_train)  # (train=True, transform=tf_ds)
+dl_train = torch.utils.data.DataLoader(ds_train, batch_size=batch_size, shuffle=False)
 
 # Test dataset & loader
-ds_test = tf.SubsetDataset(ECG_test, num_test, offset= num_train)
-dl_test = torch.utils.data.DataLoader(ds_test, batch_size= batch_size)
+ds_test = tf.SubsetDataset(ECG_test, num_test, offset=num_train)
+dl_test = torch.utils.data.DataLoader(ds_test, batch_size=batch_size)
 
 # for batch_indx, sample in enumerate(dl_train):
 #     print(sample)

@@ -2,28 +2,28 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 
+
 class ECG_tuple_transform(object):
     """
     A transform that returns a new view of a tensor.
     """
 
     def __init__(self, *view_dims):
-        self.view_dims = view_dims    
-
+        self.view_dims = view_dims
 
     def __call__(self, ECG_tuple):
-        if self.view_dims[0]==-1:
+        if self.view_dims[0] == -1:
             np.shape(ECG_tuple[0][0])
-            the_object=ECG_tuple[0][0]
-            the_object=np.ndarray.flatten(the_object)
-            A=np.squeeze(ECG_tuple[0][1])
-            the_object=np.concatenate((the_object,A),axis=0)
+            the_object = ECG_tuple[0][0]
+            the_object = np.ndarray.flatten(the_object)
+            a = np.squeeze(ECG_tuple[0][1])
+            the_object = np.concatenate((the_object, a), axis=0)
             # the_object=np.expand_dims(the_object,axis=0)
             # the_object=np.expand_dims(the_object,axis=0)
-            reshaped_vector=(the_object,ECG_tuple[1])
-            
+            reshaped_vector = (the_object, ECG_tuple[1])
+
         else:
-            reshaped_vector=ECG_tuple
+            reshaped_vector = ECG_tuple
         return reshaped_vector
 
 
@@ -33,17 +33,16 @@ class ECG_rendering_transform(object):
     """
 
     def __init__(self, *view_dims):
-        self.view_dims = view_dims    
-
+        self.view_dims = view_dims
 
     def __call__(self, ECG_tuple):
-        if self.view_dims[0]==-1:
-            the_object=ECG_tuple[0]
-            the_object=np.ndarray.flatten(the_object)
-            reshaped_vector=np.squeeze(the_object)
-            reshaped_vector=(reshaped_vector,ECG_tuple[1])
+        if self.view_dims[0] == -1:
+            the_object = ECG_tuple[0]
+            the_object = np.ndarray.flatten(the_object)
+            reshaped_vector = np.squeeze(the_object)
+            reshaped_vector = (reshaped_vector, ECG_tuple[1])
         else:
-            reshaped_vector=ECG_tuple
+            reshaped_vector = ECG_tuple
         return reshaped_vector
 
 
@@ -51,6 +50,7 @@ class SubsetDataset(Dataset):
     """
     A dataset that wraps another dataset, returning a subset from it.
     """
+
     def __init__(self, source_dataset: Dataset, subset_len, offset=0):
         """
         Create a SubsetDataset from another dataset.
@@ -73,7 +73,7 @@ class SubsetDataset(Dataset):
         if index >= self.subset_len:
             raise IndexError("Index is out of bound, can't access element {}".format(index) +
                              ' in a sequence of length {}.'.format(self.subset_len))
-            
+
         # Load item in case index is valid
         return self.source_dataset[self.offset + index]
 

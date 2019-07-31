@@ -153,9 +153,3 @@ class Ecg12ImageNet(nn.Module):
         for kernel in kernel_lengths:
             l_out = math.floor((l_out - dilation * (kernel - 1) - 1) / stride + 1)
         return l_out
-
-
-
-
-
-
