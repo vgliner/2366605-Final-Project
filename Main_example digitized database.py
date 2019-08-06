@@ -10,11 +10,13 @@ import knn_classifier as knn
 import os
 
 # Define the transforms that should be applied to each ECG record before returning it
+#root_dir=r'C:\Users\vgliner\OneDrive - JNJ\Desktop\Data' + '\\'
+root_dir=r'C:\Users\vgliner\OneDrive - JNJ\Desktop\Data_new_format' + '\\'
 tf_ds = tvtf.Compose([
     tf.ECG_tuple_transform(-1)  # Reshape to 1D Tensor
 ])
 
-ECG_test = ECG_Multilead_Dataset(root_dir=r'C:\Users\vgliner\OneDrive - JNJ\Desktop\Data' + '\\',
+ECG_test = ECG_Multilead_Dataset(root_dir=root_dir,
                                  transform=tf_ds)  # For KNN demo
 ########   Example how to access the data (Uncomment if necessary) ##############
 # ECG_test=ECG_Multilead_Dataset(root_dir=os.getcwd()+'\\Chineese_database\\',transform=None) # For access demo

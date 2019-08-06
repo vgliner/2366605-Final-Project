@@ -23,8 +23,7 @@ def draw_ECG_multilead_vanilla(ECG_info: tuple):
     y_scaling_factor = image_pixels_ratio[1] // 7
     ax.imshow(img, extent=[0, image_pixels_ratio[0], 0, image_pixels_ratio[1]])
     x_cal_signal = np.linspace(0, 0.2 * pixels_to_sec, num=np.floor(0.2 * pixels_to_sec))
-    y_cal_signal = np.ones_like(x_cal_signal) * pixels_to_m_v * 10 + ECG_info[1][0][
-        1] * y_scaling_factor + pixels_to_m_v * 10
+    y_cal_signal = np.ones_like(x_cal_signal) * pixels_to_m_v * 10 + ECG_info[1][0][1] * y_scaling_factor + pixels_to_m_v * 10
     y_cal_signal[-2:] = ECG_info[1][0][1] * y_scaling_factor + pixels_to_m_v * 10
     ax.plot(x_cal_signal, y_cal_signal, linewidth=0.5, color='black')
 
