@@ -48,20 +48,20 @@ class ECG_Rendered_Multilead_Dataset(Dataset):
                     self.classification_data.append(bool(classification_data[batch_cntr][record_in_batch_cntr]))
 
 
-            f=h5py.File(root_dir+'rendered_db_'+str(0)+'.hdf5', 'r')
-            f_keys=f.keys()
-            for key in f_keys:
-                n1 = f.get(key)
-                image_data.append(np.array(n1))
+            # f=h5py.File(root_dir+'rendered_db_'+str(0)+'.hdf5', 'r')
+            # f_keys=f.keys()
+            # for key in f_keys:
+            #     n1 = f.get(key)
+            #     image_data.append(np.array(n1))
 
-            self.batch_size_in_file_new_format=len(image_data[0])
+            # self.batch_size_in_file_new_format=len(image_data[0])
 
-            for batch_cntr in range(len(image_data)):
-                for record_in_batch_cntr in range(len(image_data[batch_cntr])):
-                    self.data.append((np.array(image_data[batch_cntr][record_in_batch_cntr]),self.classification_data[batch_cntr*self.batch_size_in_file_new_format+record_in_batch_cntr]))
+            # for batch_cntr in range(len(image_data)):
+            #     for record_in_batch_cntr in range(len(image_data[batch_cntr])):
+            #         self.data.append((np.array(image_data[batch_cntr][record_in_batch_cntr]),self.classification_data[batch_cntr*self.batch_size_in_file_new_format+record_in_batch_cntr]))
 
-            self.samples=self.data
-        print(f'Uploaded data, size of {np.shape(self.samples)}')
+            # self.samples=self.data
+        # print(f'Uploaded data, size of {np.shape(self.samples)}')
 
     def __len__(self):
         if self.new_format:
@@ -92,20 +92,26 @@ class ECG_Rendered_Multilead_Dataset(Dataset):
                     sample = self.samples[idx % 1000]
                 return sample
         else:
-            required_chunk=idx//self.batch_size_in_file_new_format
-            if not (required_chunk==self.last_chunk_uploaded_to_memory):
-                image_data=[]                
-                f=h5py.File(self.root_dir+'rendered_db_'+str(required_chunk)+'.hdf5', 'r')
-                f_keys=f.keys()
-                for key in f_keys:
-                    n1 = f.get(key)
-                    image_data.append(np.array(n1))  
-                self.data=[]   
-                for batch_cntr in range(len(image_data)):
-                    for record_in_batch_cntr in range(len(image_data[batch_cntr])):
-                        self.data.append((np.array(image_data[batch_cntr][record_in_batch_cntr]),self.classification_data[idx]))
-           
-            sample=(self.data[idx%self.batch_size_in_file_new_format])
+            # required_chunk=idx//self.batch_size_in_file_new_format
+            # if not (required_chunk==self.last_chunk_uploaded_to_memory):
+            #     image_data=[]                
+            #     f=h5py.File(self.root_dir+'rendered_db_'+str(required_chunk)+'.hdf5', 'r')
+            #     f_keys=f.keys()
+            #     for key in f_keys:
+            #         n1 = f.get(key)
+            #         image_data.append(np.array(n1))  
+            #     self.data=[]   
+            #     for batch_cntr in range(len(image_data)):
+            #         for record_in_batch_cntr in range(len(image_data[batch_cntr])):
+            #             self.data.append((np.array(image_data[batch_cntr][record_in_batch_cntr]),self.classification_data[idx]))
+                
+            # sample=(self.data[idx%self.batch_size_in_file_new_format])
+            # self.last_chunk_uploaded_to_memory=required_chunk
+            # Faster format
+            with h5py.File(self.root_dir+  "Unified_rendered_db.hdf5", "r") as f:
+                n1=f.get(str(idx))
+                image_data=np.array(n1)
+            sample=(image_data,self.classification_data[idx])
             return sample
 
 
@@ -134,6 +140,6 @@ if __name__ == "__main__":
         figManager = plt.get_current_fig_manager()
         figManager.window.showMaximized()
         plt.show()
-        print(f'Is AFIB: {K[1]}')
+        print(f'Record: {indx} ,Is AFIB: {K[1]}')
 
 

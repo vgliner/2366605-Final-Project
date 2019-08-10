@@ -6,4 +6,5 @@ Todo:
   ☐ Add additional types of rendering - not just the red one
   ✔ Fix existing database- > Unsqueeze to long lead @done(19-07-20 01:14)
   ✔ Create a new database: Rendered image to class @high @done(19-07-20 01:14)
-  ☐ Create a new database: Rendered image to digitized matrix
+  ✔ Create a new database: Rendered image to digitized matrix @done(19-08-10 20:00)
+

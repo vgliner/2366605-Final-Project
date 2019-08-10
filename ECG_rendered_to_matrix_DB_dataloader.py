@@ -5,6 +5,8 @@ import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 import h5py
+import time
+import random
 
 
 class ECG_Rendered_to_matrix_Dataset(Dataset):
@@ -53,21 +55,21 @@ class ECG_Rendered_to_matrix_Dataset(Dataset):
                 for record_in_batch_cntr in range(len(long_lead_data[batch_cntr])):
                     self.digitized_data.append((short_leads_data[batch_cntr][record_in_batch_cntr],long_lead_data[batch_cntr][record_in_batch_cntr]))
 
-            f=h5py.File(root_dir+'rendered_db_'+str(0)+'.hdf5', 'r')
-            f_keys=f.keys()
-            for key in f_keys:
-                n1 = f.get(key)
-                image_data.append(np.array(n1))
+            # f=h5py.File(root_dir+'rendered_db_'+str(0)+'.hdf5', 'r')
+            # f_keys=f.keys()
+            # for key in f_keys:
+            #     n1 = f.get(key)
+            #     image_data.append(np.array(n1))
 
-            self.batch_size_in_file_new_format=len(image_data[0])
+            # self.batch_size_in_file_new_format=len(image_data[0])
 
-            for batch_cntr in range(len(image_data)):
-                for record_in_batch_cntr in range(len(image_data[batch_cntr])):
-                    self.data.append((np.array(image_data[batch_cntr][record_in_batch_cntr]),self.digitized_data[batch_cntr*self.batch_size_in_file_new_format+record_in_batch_cntr]))
+            # for batch_cntr in range(len(image_data)):
+            #     for record_in_batch_cntr in range(len(image_data[batch_cntr])):
+            #         self.data.append((np.array(image_data[batch_cntr][record_in_batch_cntr]),self.digitized_data[batch_cntr*self.batch_size_in_file_new_format+record_in_batch_cntr]))
             
-            self.samples=self.data
+            # self.samples=self.data
 
-        print(f'Uploaded data, size of {np.shape(self.samples)}')
+        # print(f'Uploaded data, size of {np.shape(self.samples)}')
 
     def __len__(self):
         if self.new_format:
@@ -81,20 +83,24 @@ class ECG_Rendered_to_matrix_Dataset(Dataset):
     def __getitem__(self, idx):
         #TODO: Implement transformation
         if self.new_format:
-            required_chunk=idx//self.batch_size_in_file_new_format
-            if not (required_chunk==self.last_chunk_uploaded_to_memory):
-                image_data=[]                
-                f=h5py.File(self.root_dir+'rendered_db_'+str(required_chunk)+'.hdf5', 'r')
-                f_keys=f.keys()
-                for key in f_keys:
-                    n1 = f.get(key)
-                    image_data.append(np.array(n1))  
-                self.data=[]   
-                for batch_cntr in range(len(image_data)):
-                    for record_in_batch_cntr in range(len(image_data[batch_cntr])):
-                        self.data.append((np.array(image_data[batch_cntr][record_in_batch_cntr]),self.digitized_data[idx]))
+            # required_chunk=idx//self.batch_size_in_file_new_format
+            # if not (required_chunk==self.last_chunk_uploaded_to_memory):
+            #     image_data=[]                
+            #     f=h5py.File(self.root_dir+'rendered_db_'+str(required_chunk)+'.hdf5', 'r')
+            #     f_keys=f.keys()
+            #     for key in f_keys:
+            #         n1 = f.get(key)
+            #         image_data.append(np.array(n1))  
+            #     self.data=[]   
+            #     for batch_cntr in range(len(image_data)):
+            #         for record_in_batch_cntr in range(len(image_data[batch_cntr])):
+            #             self.data.append((np.array(image_data[batch_cntr][record_in_batch_cntr]),self.digitized_data[idx]))
            
-            sample=(self.data[idx%self.batch_size_in_file_new_format])
+            # sample=(self.data[idx%self.batch_size_in_file_new_format])
+            with h5py.File(self.root_dir+  "Unified_rendered_db.hdf5", "r") as f:
+                n1=f.get(str(idx))
+                image_data=np.array(n1)
+            sample=(image_data,self.digitized_data[idx])
             return sample
 
         else:
@@ -143,6 +149,14 @@ if __name__ == "__main__":
     target_path=r'C:\Users\vgliner\OneDrive - JNJ\Desktop\Data_new_format'+'\\'
     ECG_test = ECG_Rendered_to_matrix_Dataset(root_dir=target_path, transform=None, partial_upload=False)  # For KNN demo
     testing_array=[2000]#list(range(2040,2050))
+    start = time.time()
+    for x in range(1000):
+        r=random.randint(0,len(ECG_test))
+        K=ECG_test[r]
+
+    end=time.time()
+    print(f'It took {end-start} sec.')
+
     for indx in testing_array:
         K = ECG_test[indx]
         plt.imshow(K[0])

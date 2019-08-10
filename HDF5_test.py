@@ -12,24 +12,39 @@ from skimage import img_as_ubyte
 import cv2
 from ECG_renderer import *
 import time
+import random
 
+
+##################################################################################################
 # New database directory
 target_path=r'C:\Users\vgliner\OneDrive - JNJ\Desktop\Data_new_format'+'\\'
+# ECG_test=ECG_Rendered_Multilead_Dataset(root_dir=target_path,transform=None,new_format=True) # For access demo
 
-# Original directory
-root_dir = r'C:\Users\vgliner\OneDrive - JNJ\Desktop\Data'+'\\'
+# with h5py.File(target_path+"Unified_rendered_db.hdf5","w") as f:
+#     for x in range(len(ECG_test)):
+#         to_store=ECG_test[x]
+#         dset=f.create_dataset(str(x),data=to_store[0])
+#         print(f"Processed : {x}")
 
-start = time.time()
-ECG_test=ECG_Multilead_Dataset(root_dir=root_dir,transform=None,new_format=False) # For access demo
-sample_test=ECG_test[2] #Taking for example record number 2 (Starting from zero)
-end = time.time()
-print(f'Time taken {end-start}')
+
+
+
+# # Original directory
+# root_dir = r'C:\Users\vgliner\OneDrive - JNJ\Desktop\Data'+'\\'
+
 # start = time.time()
-# ECG_test=ECG_Multilead_Dataset(root_dir=target_path,transform=None,new_format=True) # For access demo
-# sample_test2=ECG_test[2] #Taking for example record number 2 (Starting from zero)
+# ECG_test=ECG_Multilead_Dataset(root_dir=root_dir,transform=None,new_format=False) # For access demo
+# sample_test=ECG_test[2] #Taking for example record number 2 (Starting from zero)
 # end = time.time()
 # print(f'Time taken {end-start}')
-print('Stopped here')
+# # start = time.time()
+# # ECG_test=ECG_Multilead_Dataset(root_dir=target_path,transform=None,new_format=True) # For access demo
+# # sample_test2=ECG_test[2] #Taking for example record number 2 (Starting from zero)
+# # end = time.time()
+# # print(f'Time taken {end-start}')
+# print('Stopped here')
+
+########################################################################################
 # Converting the existing AF database to the new format
 # Define the transforms that should be applied to each ECG record before returning it
 
@@ -225,3 +240,32 @@ print('Stopped here')
 # for item in loaded_data:
 #     total_num+=len(item)
 # print(f'Finished loading, total number of short_leads_digitized {total_num}')
+
+
+# #####  Investigate performance of the loader #####
+# Randomly choose 100 numbers
+ECG_test=ECG_Rendered_Multilead_Dataset(root_dir=target_path,transform=None,new_format=True) # For access demo
+sample_test=ECG_test[2] #Taking for example record number 2 (Starting from zero)
+num_of_records_to_test=50
+records_for_test=[]
+start = time.time()
+for x in range(num_of_records_to_test):
+    records_for_test.append(random.randint(0,len(ECG_test)))
+    sample_test=ECG_test[records_for_test[-1]]
+    print(f'Now processidng: {x}')
+
+end = time.time()
+print(f'Time taken {end-start}')
+
+## New format
+start = time.time()
+for x in records_for_test:
+    print(f'Now processidng: {x}')
+    with h5py.File(target_path+  "Unified_rendered_db.hdf5", "r") as f:
+        n1=f.get(str(x))
+        image_data=np.array(n1)
+end = time.time()
+print(f'Time taken {end-start}')
+        
+
+print('Finished')
