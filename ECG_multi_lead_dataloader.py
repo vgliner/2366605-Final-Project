@@ -97,3 +97,10 @@ class ECG_Multilead_Dataset(Dataset):
         if PRINT_FLAG:
             print(f'Loaded data with type of: {type(pickled_data)}')
         return pickled_data  
+
+
+if __name__=="__main__":
+    target_path=r'C:\Users\vgliner\OneDrive - JNJ\Desktop\Data_new_format'+'\\'
+    ECG_test=ECG_Multilead_Dataset(target_path)
+    ECG_test.plot(22)
+
