@@ -7,11 +7,13 @@ import matplotlib.pyplot as plt
 import h5py
 import time
 import random
+from  Perspective_transformation import *
+
 
 
 class ECG_Rendered_to_matrix_Dataset(Dataset):
     # Convention   [n , height, width, color channel] 
-    def __init__(self, root_dir=None, transform=None, partial_upload=False,new_format=True):
+    def __init__(self, root_dir=None, transform=None, partial_upload=False,new_format=True, apply_perspective_transformation=False):
         super().__init__()
         self.data = []
         self.digitized_data=[]
@@ -22,6 +24,8 @@ class ECG_Rendered_to_matrix_Dataset(Dataset):
         self.new_format=new_format
         self.batch_size_in_file_new_format=650
         self.root_dir=root_dir        
+        self.apply_perspective_transformation=apply_perspective_transformation
+
 
         if root_dir is None:
             self.dataset_path = os.getcwd()+'\\Chineese_database\\'
@@ -100,6 +104,8 @@ class ECG_Rendered_to_matrix_Dataset(Dataset):
             with h5py.File(self.root_dir+  "Unified_rendered_db.hdf5", "r") as f:
                 n1=f.get(str(idx))
                 image_data=np.array(n1)
+                if self.apply_perspective_transformation:
+                    image_data=Perspective_transformation_application(image_data,database_path=self.root_dir)                
             sample=(image_data,self.digitized_data[idx])
             return sample
 
@@ -147,12 +153,13 @@ class ECG_Rendered_to_matrix_Dataset(Dataset):
 if __name__ == "__main__":
     # New database directory
     target_path=r'C:\Users\vgliner\OneDrive - JNJ\Desktop\Data_new_format'+'\\'
-    ECG_test = ECG_Rendered_to_matrix_Dataset(root_dir=target_path, transform=None, partial_upload=False)  # For KNN demo
+    ECG_test = ECG_Rendered_to_matrix_Dataset(root_dir=target_path, transform=None, partial_upload=False,apply_perspective_transformation=True)  # For KNN demo
     testing_array=[2000]#list(range(2040,2050))
     start = time.time()
-    for x in range(1000):
+    for x in range(50):
         r=random.randint(0,len(ECG_test))
         K=ECG_test[r]
+        # print('Stop')
 
     end=time.time()
     print(f'It took {end-start} sec.')

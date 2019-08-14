@@ -5,11 +5,12 @@ import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 import h5py
+from  Perspective_transformation import *
 
 
 class ECG_Rendered_Multilead_Dataset(Dataset):
     # Convention   [n , height, width, color channel] 
-    def __init__(self, root_dir=None, transform=None, partial_upload=False,new_format=True):
+    def __init__(self, root_dir=None, transform=None, partial_upload=False,new_format=True, apply_perspective_transformation=False):
         super().__init__()
         self.data = []
         self.data_info = []
@@ -20,6 +21,7 @@ class ECG_Rendered_Multilead_Dataset(Dataset):
         self.batch_size_in_file_new_format=650
         self.classification_data=[]
         self.root_dir=root_dir
+        self.apply_perspective_transformation=apply_perspective_transformation
 
         if root_dir is None:
             self.dataset_path = os.getcwd() + '\\Chineese_database\\'
@@ -92,25 +94,11 @@ class ECG_Rendered_Multilead_Dataset(Dataset):
                     sample = self.samples[idx % 1000]
                 return sample
         else:
-            # required_chunk=idx//self.batch_size_in_file_new_format
-            # if not (required_chunk==self.last_chunk_uploaded_to_memory):
-            #     image_data=[]                
-            #     f=h5py.File(self.root_dir+'rendered_db_'+str(required_chunk)+'.hdf5', 'r')
-            #     f_keys=f.keys()
-            #     for key in f_keys:
-            #         n1 = f.get(key)
-            #         image_data.append(np.array(n1))  
-            #     self.data=[]   
-            #     for batch_cntr in range(len(image_data)):
-            #         for record_in_batch_cntr in range(len(image_data[batch_cntr])):
-            #             self.data.append((np.array(image_data[batch_cntr][record_in_batch_cntr]),self.classification_data[idx]))
-                
-            # sample=(self.data[idx%self.batch_size_in_file_new_format])
-            # self.last_chunk_uploaded_to_memory=required_chunk
-            # Faster format
             with h5py.File(self.root_dir+  "Unified_rendered_db.hdf5", "r") as f:
                 n1=f.get(str(idx))
                 image_data=np.array(n1)
+                if self.apply_perspective_transformation:
+                    image_data=Perspective_transformation_application(image_data,database_path=self.root_dir)
             sample=(image_data,self.classification_data[idx])
             return sample
 
@@ -132,7 +120,7 @@ class ECG_Rendered_Multilead_Dataset(Dataset):
 if __name__ == "__main__":
     # New database directory
     target_path=r'C:\Users\vgliner\OneDrive - JNJ\Desktop\Data_new_format'+'\\'
-    ECG_test = ECG_Rendered_Multilead_Dataset(root_dir=target_path, transform=None, partial_upload=False)  # For KNN demo
+    ECG_test = ECG_Rendered_Multilead_Dataset(root_dir=target_path, transform=None, partial_upload=False,apply_perspective_transformation=True)  # For KNN demo
     testing_array=list(range(2040,2050))
     for indx in testing_array:
         K = ECG_test[indx]

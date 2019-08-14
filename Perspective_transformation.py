@@ -6,6 +6,10 @@ from ECG_rendered_to_matrix_DB_dataloader import *
 import matplotlib.pyplot as plt
 from scipy import misc, ndimage
 from ECG_multi_lead_dataloader import *
+import cv2
+import winsound
+import numpy as np
+
 
 
 
@@ -66,13 +70,26 @@ class RandomPerspective(object):
     def __repr__(self):
         return self.__class__.__name__ + '(p={})'.format(self.p)
 
+def Perspective_transformation_application(image,database_path=''):
+    k=str(random.randint(1,10))
+    with h5py.File(database_path+'backgrounds_db.hdf5', 'r') as f:
+        bgrnd= np.array(f[k])    
+    merged_im=bgrnd
+    K=image
+    starting_point=((bgrnd.shape[0]-K.shape[0])//2,(bgrnd.shape[1]-K.shape[1])//2)
+    merged_im[starting_point[0]:starting_point[0]+K.shape[0],starting_point[1]:starting_point[1]+K.shape[1]]=K[:,:,[2,1,0]]
+    T=torchvision.transforms.RandomPerspective(distortion_scale=0.2, p=0.9, interpolation=3)
+    Output=np.array(T(Image.fromarray(merged_im)))
+    sub_image=Output[450:-450,700:-700,:]
+    return sub_image[:,:,[2,1,0]]
+
+
+
+
 PHASE =1
 
 if __name__=="__main__":
     target_path=r'C:\Users\vgliner\OneDrive - JNJ\Desktop\Data_new_format'+'\\'
-    ECG_test=ECG_Multilead_Dataset(target_path)
-    B=ECG_test[2]
-    B.plot(2)
 
     print('Evaluating')
     ECG_test = ECG_Rendered_to_matrix_Dataset(root_dir=target_path, transform=None, partial_upload=False)  
@@ -80,53 +97,90 @@ if __name__=="__main__":
     print(f'ECG shape is : {np.shape(K[0])} ')
     load_file='Backgrounds\\'
     ECG_shape=np.shape(K[0])
-    if PHASE==1:
-        print('Executing phase 1')
-        for image_cntr in range(1,11):
-            load_file='Backgrounds\\'
-            load_file=load_file+str(image_cntr)+'.jpg'
-            face = misc.imread(load_file)
-            background_shape=np.shape(face)
-            ratio=[aItem/bItem for aItem, bItem in zip(ECG_shape, background_shape)]
-            print(f'Shape of {image_cntr} is: {np.shape(face)}')
-            # plt.imshow(face)
-            # plt.show()
-            # for cntr in range(4):
-            #     strt=time.time()
-            #     face1=ndimage.zoom(face,2,order=cntr)
-            #     face1=face1[:,:,0:3]
-            #     stp=time.time()
-            #     print(f'Elapsed time : {stp-strt}, counter : {cntr} ')
-            #     plt.imshow(face1)
-            #     plt.show()                                                
+    sizes_log=[]
+    cv2.imshow("ECG",K[0][:,:,[2,1,0]])
+    cv2.waitKey(0)
+    # #####################   Creating background database ####################
+    # if PHASE==1:
+    #     print('Executing phase 1')
+    #     for image_cntr in range(1,11):
+    #         load_file='Backgrounds\\'
+    #         load_file=load_file+str(image_cntr)+'.jpg'
+    #         image = cv2.imread(load_file)
+    #         # cv2.imshow("original", image)
+    #         # cv2.waitKey(0)
+    #         # face = misc.imread(load_file)
+    #         # plt.imshow(face)
+    #         # plt.show()            
+    #         background_shape=np.shape(image)
+    #         ratio=[aItem/bItem for aItem, bItem in zip(ECG_shape, background_shape)]
+    #         minimal_ratio=max(ratio[0:2])
+    #         zoom_ratio=np.ceil(2/(1/minimal_ratio))
+    #         print(f'Zoom ratio is going to be : {zoom_ratio}')
+    #         dim = (int(image.shape[1] * zoom_ratio),int(image.shape[0] * zoom_ratio))
+             
+    #         # perform the actual resizing of the image and show it
+    #         resized = cv2.resize(image, dim, interpolation = cv2.INTER_CUBIC)
+
+    #         sizes_log.append(np.shape(resized))
 
 
-            # backgroundImage=Image.open(load_file)            
+    #         # backgroundImage=Image.open(load_file)            
+    #     minimas=np.min(sizes_log,axis=0)
+    #     print('Finished phase 1')
+    #     with h5py.File("backgrounds_db.hdf5", "w") as f: 
+    #         for image_cntr in range(1,11):
+    #             load_file='Backgrounds\\'
+    #             load_file=load_file+str(image_cntr)+'.jpg'
+    #             image = cv2.imread(load_file)        
+    #             background_shape=np.shape(image)
+    #             ratio=[aItem/bItem for aItem, bItem in zip(ECG_shape, background_shape)]
+    #             minimal_ratio=max(ratio[0:2])
+    #             zoom_ratio=np.ceil(2/(1/minimal_ratio))
+    #             print(f'Zoom ratio is going to be : {zoom_ratio}')
+    #             dim = (int(image.shape[1] * zoom_ratio),int(image.shape[0] * zoom_ratio))
+                
+    #             # perform the actual resizing of the image and show it
+    #             resized = cv2.resize(image, dim, interpolation = cv2.INTER_CUBIC)
+    #             resized= resized[:minimas[0],:minimas[1]]
+    #             dset = f.create_dataset(str(image_cntr), data=resized)
+    # #####################  END OF Creating background database ####################
 
-        print('Finished phase 1')
-
-    ## Uploading image
-    Im=Image.open("test.png")
-    Im.show()
-    for cntr in range(10):
-        Current_ECG=ECG_test[cntr]
-        ECG_image=Current_ECG[0]
-        # plt.imshow(ECG_image)
-        # plt.show()
         # Convert PIL to numpy  -> pix = numpy.array(pic)
         # Convert numpy to PIL -> im = Image.fromarray(np.uint8(ECG_image*255))
 
 #TODO: Save backgrounds as numpy array
 
-        ECG_image_PLL=Image.fromarray(ECG_image)
-        ECG_image_PLL.show()
-        load_file=load_file+str(random.randint(1,10))+'.jpg'
-        backgroundImage=Image.open(load_file)
-        P=RandomPerspective(distortion_scale=0.4, p=0.5, interpolation=3)
-        new_img = Image.blend(backgroundImage, Im, 0.5)
-        Im2=P(Im)
-        Im2.show()
+        # ECG_image_PLL=Image.fromarray(ECG_image)
+        # ECG_image_PLL.show()
+        # load_file=load_file+str(random.randint(1,10))+'.jpg'
+        # backgroundImage=Image.open(load_file)
+        # P=RandomPerspective(distortion_scale=0.4, p=0.5, interpolation=3)
+        # new_img = Image.blend(backgroundImage, Im, 0.5)
+        # Im2=P(Im)
+        # Im2.show()
+    
+    with h5py.File('backgrounds_db.hdf5', 'r') as f:
+        for cntr in range(50):
+            k=str(random.randint(1,10))
+            bgrnd= np.array(f[k])
+            # cv2.imshow("background",bgrnd)
+            # cv2.waitKey(0)
+            print(f'ECG shape is {np.shape(K[0])}, background shape is: {np.shape(bgrnd)}')
+            merged_im=bgrnd
+            starting_point=((bgrnd.shape[0]-K[0].shape[0])//2,(bgrnd.shape[1]-K[0].shape[1])//2)
+            merged_im[starting_point[0]:starting_point[0]+K[0].shape[0],starting_point[1]:starting_point[1]+K[0].shape[1]]=K[0][:,:,[2,1,0]]
+            # cv2.imshow("Merged",merged_im)        
+            # cv2.waitKey(0)
+            # for i in range(50):
+            T=torchvision.transforms.RandomPerspective(distortion_scale=0.2, p=0.9, interpolation=3)
+            Output=np.array(T(Image.fromarray(merged_im)))
+            sub_image=Output[450:-450,700:-700,:]
+            # cv2.namedWindow('Output',cv2.WINDOW_NORMAL)
+            # cv2.imshow("Output",sub_image)        
+            # cv2.waitKey(0)
+            plt.imshow(sub_image[:,:,[2,1,0]])
+            plt.show()
 
-    T=torchvision.transforms.RandomPerspective(distortion_scale=0.5, p=0.5, interpolation=3)
     print('Finished')
 
