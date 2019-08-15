@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 from scipy import misc, ndimage
 from ECG_multi_lead_dataloader import *
 import cv2
-import winsound
 import numpy as np
 
 
