@@ -159,7 +159,7 @@ if __name__=="__main__":
         # Im2=P(Im)
         # Im2.show()
     
-    with h5py.File('backgrounds_db.hdf5', 'r') as f:
+    with h5py.File(target_path+'backgrounds_db.hdf5', 'r') as f:
         for cntr in range(50):
             k=str(random.randint(1,10))
             bgrnd= np.array(f[k])
