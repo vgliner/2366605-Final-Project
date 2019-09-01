@@ -69,7 +69,7 @@ class RandomPerspective(object):
     def __repr__(self):
         return self.__class__.__name__ + '(p={})'.format(self.p)
 
-def Perspective_transformation_application(image,database_path=''):
+def Perspective_transformation_application(image,database_path='',realtime_rendering=False):
     k=str(random.randint(1,10))
     with h5py.File(database_path+'backgrounds_db.hdf5', 'r') as f:
         bgrnd= np.array(f[k])    
@@ -77,9 +77,12 @@ def Perspective_transformation_application(image,database_path=''):
     K=image
     starting_point=((bgrnd.shape[0]-K.shape[0])//2,(bgrnd.shape[1]-K.shape[1])//2)
     merged_im[starting_point[0]:starting_point[0]+K.shape[0],starting_point[1]:starting_point[1]+K.shape[1]]=K[:,:,[2,1,0]]
-    T=torchvision.transforms.RandomPerspective(distortion_scale=0.2, p=0.9, interpolation=3)
+    T=torchvision.transforms.RandomPerspective(distortion_scale=0.15, p=0.9, interpolation=3)
     Output=np.array(T(Image.fromarray(merged_im)))
-    sub_image=Output[450:-450,700:-700,:]
+    if realtime_rendering==False:
+        sub_image=Output[250:-250,400:-400,:]
+    else:
+        sub_image=Output[141:-141,222:-222,:]
     return sub_image[:,:,[2,1,0]]
 
 
@@ -165,7 +168,6 @@ if __name__=="__main__":
             bgrnd= np.array(f[k])
             # cv2.imshow("background",bgrnd)
             # cv2.waitKey(0)
-            print(f'ECG shape is {np.shape(K[0])}, background shape is: {np.shape(bgrnd)}')
             merged_im=bgrnd
             starting_point=((bgrnd.shape[0]-K[0].shape[0])//2,(bgrnd.shape[1]-K[0].shape[1])//2)
             merged_im[starting_point[0]:starting_point[0]+K[0].shape[0],starting_point[1]:starting_point[1]+K[0].shape[1]]=K[0][:,:,[2,1,0]]
@@ -175,6 +177,8 @@ if __name__=="__main__":
             T=torchvision.transforms.RandomPerspective(distortion_scale=0.2, p=0.9, interpolation=3)
             Output=np.array(T(Image.fromarray(merged_im)))
             sub_image=Output[450:-450,700:-700,:]
+            print(f'ECG shape is {np.shape(K[0])}, sub_image shape is: {np.shape(sub_image)}')
+
             # cv2.namedWindow('Output',cv2.WINDOW_NORMAL)
             # cv2.imshow("Output",sub_image)        
             # cv2.waitKey(0)

@@ -6,15 +6,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 import h5py
 from  Perspective_transformation import *
+from  Realtime_ECG_drawing import *
+
 
 
 class ECG_Rendered_Multilead_Dataset(Dataset):
     # Convention   [n , height, width, color channel] 
-    def __init__(self, root_dir=None, transform=None, partial_upload=False,new_format=True, apply_perspective_transformation=False):
+    def __init__(self, root_dir=None, transform=None, partial_upload=False,new_format=True, apply_perspective_transformation=False, realtime_rendering=True):
         super().__init__()
         self.data = []
         self.data_info = []
         self.transform = transform
+        self.realtime_rendering=realtime_rendering
         self.last_chunk_uploaded_to_memory = 1
         self.partial_upload = partial_upload
         self.new_format=new_format
@@ -27,6 +30,7 @@ class ECG_Rendered_Multilead_Dataset(Dataset):
             self.dataset_path = os.getcwd() + '\\Chineese_database\\'
         else:
             self.dataset_path = root_dir
+        
         if new_format==False:
             for indx, file in enumerate(glob.glob(self.dataset_path + "*.pkl")):
                 unpickled_data = self.unpickle_ECG_data(file=file)
@@ -48,22 +52,12 @@ class ECG_Rendered_Multilead_Dataset(Dataset):
             for batch_cntr in range(len(classification_data)):
                 for record_in_batch_cntr in range(len(classification_data[batch_cntr])):
                     self.classification_data.append(bool(classification_data[batch_cntr][record_in_batch_cntr]))
+    
+        if self.realtime_rendering==True:
+            self.canvas= cv2.imread(root_dir+'ECG_paper.jpg',cv2.IMREAD_COLOR )
+            self.canvas = cv2.resize(self.canvas,None,fx=1.2, fy=1.2, interpolation = cv2.INTER_CUBIC)
+            self.ECG_Data_init = ECG_Multilead_Dataset(root_dir=self.dataset_path,transform=self.transform, partial_upload=self.partial_upload)
 
-
-            # f=h5py.File(root_dir+'rendered_db_'+str(0)+'.hdf5', 'r')
-            # f_keys=f.keys()
-            # for key in f_keys:
-            #     n1 = f.get(key)
-            #     image_data.append(np.array(n1))
-
-            # self.batch_size_in_file_new_format=len(image_data[0])
-
-            # for batch_cntr in range(len(image_data)):
-            #     for record_in_batch_cntr in range(len(image_data[batch_cntr])):
-            #         self.data.append((np.array(image_data[batch_cntr][record_in_batch_cntr]),self.classification_data[batch_cntr*self.batch_size_in_file_new_format+record_in_batch_cntr]))
-
-            # self.samples=self.data
-        # print(f'Uploaded data, size of {np.shape(self.samples)}')
 
     def __len__(self):
         if self.new_format:
@@ -75,32 +69,50 @@ class ECG_Rendered_Multilead_Dataset(Dataset):
                 return 41830
 
     def __getitem__(self, idx):
-        if self.new_format==False:
-            chunk_number = idx // 1000 + 1
-            if chunk_number == self.last_chunk_uploaded_to_memory:
-                if self.transform:
-                    sample = self.transform(self.samples[idx % 1000])
+        if self.realtime_rendering==False:
+            if self.new_format==False:
+                chunk_number = idx // 1000 + 1
+                if chunk_number == self.last_chunk_uploaded_to_memory:
+                    if self.transform:
+                        sample = self.transform(self.samples[idx % 1000])
+                    else:
+                        sample = self.samples[idx % 1000]
+                    return sample
                 else:
-                    sample = self.samples[idx % 1000]
-                return sample
+                    file = self.dataset_path + 'Rendered_data' + str(max(1, idx // 1000 + 1)) + '.pkl'
+                    unpickled_data = self.unpickle_ECG_data(file=file)
+                    self.last_chunk_uploaded_to_memory = max(1, idx // 1000 + 1)
+                    self.samples = unpickled_data
+                    if self.transform:
+                        sample = self.transform(self.samples[idx % 1000])
+                    else:
+                        sample = self.samples[idx % 1000]
+                    return sample
             else:
-                file = self.dataset_path + 'Rendered_data' + str(max(1, idx // 1000 + 1)) + '.pkl'
-                unpickled_data = self.unpickle_ECG_data(file=file)
-                self.last_chunk_uploaded_to_memory = max(1, idx // 1000 + 1)
-                self.samples = unpickled_data
-                if self.transform:
-                    sample = self.transform(self.samples[idx % 1000])
-                else:
-                    sample = self.samples[idx % 1000]
+                with h5py.File(self.root_dir+  "Unified_rendered_db.hdf5", "r") as f:
+                    n1=f.get(str(idx))
+                    image_data=np.array(n1)
+                    if self.apply_perspective_transformation:
+                        image_data=Perspective_transformation_application(image_data,database_path=self.root_dir)
+              
+
+                sample=(image_data,self.classification_data[idx])
                 return sample
         else:
-            with h5py.File(self.root_dir+  "Unified_rendered_db.hdf5", "r") as f:
-                n1=f.get(str(idx))
-                image_data=np.array(n1)
-                if self.apply_perspective_transformation:
-                    image_data=Perspective_transformation_application(image_data,database_path=self.root_dir)
+            ECG_Data=self.ECG_Data_init[idx]
+            image_data=draw_ECG_multilead_vanilla_ver2(ECG_Data[0], self.canvas,to_plot=False)
+            if self.apply_perspective_transformation:
+                image_size_before_rendering=np.shape(image_data)
+                image_data=Perspective_transformation_application(image_data,database_path=self.root_dir,realtime_rendering=True)
+                image_size_after_rendering=np.shape(image_data)    
+                size_diff=(np.asarray(image_size_after_rendering)-np.asarray(image_size_before_rendering))
+                if self.new_format==True:
+                    #image_data=image_data[size_diff[0]//2:-size_diff[0]//2,size_diff[1]//2:-size_diff[1]//2,[2,1,0]]
+                    image_data=cv2.resize(image_data,None,fx=image_size_before_rendering[0]/image_size_after_rendering[0], fy=image_size_before_rendering[1]/image_size_after_rendering[1], interpolation = cv2.INTER_AREA)
+                    image_data=image_data[:,:,[2,1,0]]
             sample=(image_data,self.classification_data[idx])
             return sample
+
 
 
     def unpickle_ECG_data(self, file='ECG_data.pkl'):
@@ -120,13 +132,12 @@ class ECG_Rendered_Multilead_Dataset(Dataset):
 if __name__ == "__main__":
     # New database directory
     target_path=r'C:\Users\vgliner\OneDrive - JNJ\Desktop\Data_new_format'+'\\'
-    ECG_test = ECG_Rendered_Multilead_Dataset(root_dir=target_path, transform=None, partial_upload=False,apply_perspective_transformation=True)  # For KNN demo
+    ECG_test = ECG_Rendered_Multilead_Dataset(root_dir=target_path, transform=None, partial_upload=False,apply_perspective_transformation=True,realtime_rendering=True)  # For KNN demo
     testing_array=list(range(2040,2050))
     for indx in testing_array:
         K = ECG_test[indx]
         plt.imshow(K[0])
         figManager = plt.get_current_fig_manager()
-        figManager.window.showMaximized()
         plt.show()
         print(f'Record: {indx} ,Is AFIB: {K[1]}')
 
