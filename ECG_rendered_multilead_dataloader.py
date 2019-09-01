@@ -7,6 +7,9 @@ import matplotlib.pyplot as plt
 import h5py
 from  Perspective_transformation import *
 from  Realtime_ECG_drawing import *
+import time
+import random
+
 
 
 
@@ -109,7 +112,7 @@ class ECG_Rendered_Multilead_Dataset(Dataset):
                 if self.new_format==True:
                     #image_data=image_data[size_diff[0]//2:-size_diff[0]//2,size_diff[1]//2:-size_diff[1]//2,[2,1,0]]
                     image_data=cv2.resize(image_data,None,fx=image_size_before_rendering[0]/image_size_after_rendering[0], fy=image_size_before_rendering[1]/image_size_after_rendering[1], interpolation = cv2.INTER_AREA)
-                    image_data=image_data[:,:,[2,1,0]]
+            image_data=image_data[:,:,[2,1,0]]
             sample=(image_data,self.classification_data[idx])
             return sample
 
@@ -132,13 +135,21 @@ class ECG_Rendered_Multilead_Dataset(Dataset):
 if __name__ == "__main__":
     # New database directory
     target_path=r'C:\Users\vgliner\OneDrive - JNJ\Desktop\Data_new_format'+'\\'
-    ECG_test = ECG_Rendered_Multilead_Dataset(root_dir=target_path, transform=None, partial_upload=False,apply_perspective_transformation=True,realtime_rendering=True)  # For KNN demo
-    testing_array=list(range(2040,2050))
+    ECG_test = ECG_Rendered_Multilead_Dataset(root_dir=target_path, transform=None, partial_upload=False,apply_perspective_transformation=False,realtime_rendering=True)  # For KNN demo
+    testing_array=list(range(0,10000))
+    start = time.time()
     for indx in testing_array:
-        K = ECG_test[indx]
+        rand_indx=random.randint(10,41830)
+        K = ECG_test[rand_indx]
+        if (indx%20==0) and indx>0:
+            print(f'Currently processing index: {indx}')
+            end = time.time()
+            print((end - start)/indx)
         plt.imshow(K[0])
         figManager = plt.get_current_fig_manager()
         plt.show()
         print(f'Record: {indx} ,Is AFIB: {K[1]}')
+    end = time.time()
+    print(end - start)
 
 

@@ -75,7 +75,7 @@ def draw_ECG_multilead_vanilla_ver2(ECG_Data, canvas, to_plot=False):
     pixels_to_mv = 60 // 10  # 60 pixels /10mV
     pixels_to_sec = 90 // (0.2 * 3)  #
     image_pixels_ratio = [canvas_dims[1], canvas_dims[0]]  # (X,Y)
-    line_width=2
+    line_width=3
 
     ## Draw calibration signal
     calibration_signal_pivots=[180,417,655,893]
