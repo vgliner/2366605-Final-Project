@@ -289,11 +289,12 @@ class EcgImageToDigitizedTrainer(Trainer):
         x = x.transpose(1, 2).transpose(1, 3).to(self.device, dtype=torch.float)
         y = (y[0].to(self.device, dtype=torch.float), y[1].to(self.device, dtype=torch.float))
         batch_size = y[0].shape[0]
+        dim_ratio = y[0].nelement()/y[1].nelement()
 
         self.optimizer.zero_grad()
 
         out = self.model(x)
-        loss = self.loss_fn(out[0], y[0]) + self.loss_fn(out[1], y[1])
+        loss = dim_ratio*self.loss_fn(out[0], y[0]) + self.loss_fn(out[1], y[1])
         loss.backward()
         self.optimizer.step()
 

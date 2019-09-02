@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import math
+import time
 
 
 # A simple but versatile d1 convolutional neural net
@@ -237,6 +238,119 @@ class Ecg12ImageToSignalNet(nn.Module):
         start_long = (out_long.shape[2] - self.l_out_long) // 2
         return out_short[:, :, start_short:start_short + self.l_out_short], \
             out_long[:, :, start_long:start_long + self.l_out_long]
+
+
+class NewNet(nn.Module):
+
+    def __init__(self, in_channels: int, in_h: int, in_w: int,
+                 conv_hidden_channels: list, conv_kernel_sizes: list,
+                 conv_dropout=None, conv_stride=1, conv_dilation=1, conv_batch_norm=False,
+                 fc_hidden_dims=(), l_out_long=5000, l_out_short=1250, short_leads=12, long_leads=1):
+
+        super().__init__()
+        self.short_leads = short_leads
+        self.long_leads = long_leads
+        self.l_out_short = l_out_short
+        self.l_out_long = l_out_long
+        self.out_dim_short = l_out_short*short_leads
+        self.out_dim_long = l_out_long*long_leads
+        self.out_dim = self.out_dim_long + self.out_dim_short
+
+        self.cnn2d = Ecg12ImageNet(in_channels, hidden_channels=conv_hidden_channels, kernel_sizes=conv_kernel_sizes,
+                                   in_h=in_h, in_w=in_w, fc_hidden_dims=fc_hidden_dims, dropout=conv_dropout,
+                                   stride=conv_stride, dilation=conv_dilation, batch_norm=conv_batch_norm,
+                                   num_of_classes=self.out_dim)
+
+        self.cnn1d_short = nn.Conv1d(short_leads, short_leads, 5, 1, 2, 1, 1, True)
+        self.cnn1d_long = nn.Conv1d(long_leads, long_leads, 5, 1, 2, 1, 1, True)
+
+        self.s = nn.Sigmoid()
+
+    def forward(self, x):
+        batch_size = x.shape[0]
+        out = self.cnn2d(x)
+        out_long = out[:, 0:self.out_dim_long].reshape(batch_size, self.long_leads, self.l_out_long)
+        out_short = out[:, self.out_dim_long:].reshape(batch_size, self.short_leads, self.l_out_short)
+        out_long = self.cnn1d_long(out_long)
+        out_short = self.cnn1d_short(out_short)
+        return self.s(out_short), self.s(out_long)
+
+
+class BloodSugarSexMagik(nn.Module):
+
+    def __init__(self, in_channels: int, in_h: int, in_w: int, in_kernel=3, cleaned_channels=1, attention_kernel=3,
+                 bias_kernel=3, l_out_long=5000, l_out_short=1250, short_leads=12, long_leads=1):
+
+        super().__init__()
+        assert in_kernel % 2 == attention_kernel % 2 == bias_kernel % 2 == 1
+
+        self.in_h = in_h
+        self.in_w = in_w
+        self.long_leads = long_leads
+        self.short_leads = short_leads
+        self.l_out_long = l_out_long
+        self.l_out_short = l_out_short
+
+        self.in_conv = nn.Conv2d(in_channels, cleaned_channels, in_kernel, padding=in_kernel//2)
+        self.reLu = nn.ReLU()
+
+        self.attention_short = nn.Conv2d(short_leads + cleaned_channels, short_leads,
+                                         attention_kernel, padding=attention_kernel//2)
+        self.bias_short = nn.Conv2d(short_leads + cleaned_channels, short_leads,
+                                    bias_kernel, padding=bias_kernel//2)
+        self.attention_long = nn.Conv2d(long_leads + cleaned_channels, long_leads, attention_kernel,
+                                        padding=attention_kernel//2)
+        self.bias_long = nn.Conv2d(long_leads + cleaned_channels, long_leads, bias_kernel,
+                                   padding=bias_kernel//2)
+
+        self.fc_short = nn.Linear(in_h*in_w*short_leads, short_leads)
+        self.fc_long = nn.Linear(in_h*in_w*long_leads, long_leads)
+
+        self.h_a_short = torch.zeros((1, self.short_leads, self.in_h, self.in_w))
+        self.h_a_long = torch.zeros((1, self.long_leads, self.in_h, self.in_w))
+        self.h_b_short = torch.zeros_like(self.h_a_short)
+        self.h_b_long = torch.zeros_like(self.h_a_long)
+
+    def forward(self, x, h=None, y_short=0, y_long=0, short_steps=100, long_steps=100):
+        device = x.device
+        batch_size = x.shape[0]
+        
+        if h is not None:
+            self.h_a_short = h[0]
+            self.h_a_long = h[1]
+            self.h_b_short = h[2]
+            self.h_b_long = h[3]
+        
+        self.h_a_short = self.h_a_short.to(device)
+        self.h_a_long = self.h_a_long.to(device)
+        self.h_b_short = self.h_b_short.to(device)
+        self.h_b_long = self.h_b_long.to(device)
+        
+        
+
+        c = self.in_conv(x)
+        start = time.time()
+        for i in range(short_steps):
+            1==1
+            self.h_a_short = self.attention_short(torch.cat((c, self.h_a_short), dim=1))
+            self.h_b_short = self.bias_short(torch.cat((c, self.h_b_short), dim=1))
+            out = c*self.h_a_short + self.h_b_short
+            print(out.shape)
+            #out = self.fc_short(out.reshape(batch_size, -1)).reshape(batch_size, self.short_leads, 1)
+            #y_short = torch.cat((y_short, out), dim=2)
+        
+        for i in range(long_steps):
+            h_a_long = self.attention_long(torch.cat((c, self.h_a_long), dim=1))
+            h_b_long = self.bias_long(torch.cat((c, self.h_b_long), dim=1))
+            out = c*h_a_long + h_b_long
+            out = self.fc_long(out.reshape(batch_size, -1)).reshape(batch_size, self.long_leads, 1)
+            #y_long = torch.cat((y_long, out), dim=2)
+        
+        y = (y_short, y_long)
+        h = (self.h_a_short.detach_(), self.h_a_long.detach_(), self.h_b_short.detach_(), self.h_b_long.detach_())
+        end = time.time()
+        print(f'Time taken {end - start}')        
+        return y, h
 
 
 def calc_out_length(l_in: int, kernel_lengths: list, stride: int, dilation: int, padding=0):
