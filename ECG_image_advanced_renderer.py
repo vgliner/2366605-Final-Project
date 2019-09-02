@@ -42,7 +42,7 @@ class Perspective_Rendering:
             # TODO: Later correct to random number
         img = cv2.imread(self.backgrounds_path+f'{background_number}.jpg')
         rows,cols,ch = img.shape
-        print(f'Loaded background template number {background_number},shape of {rows}, {cols}, {ch}')
+        # print(f'Loaded background template number {background_number},shape of {rows}, {cols}, {ch}')
         return img
 
 
