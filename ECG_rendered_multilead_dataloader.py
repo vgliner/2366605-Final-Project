@@ -104,6 +104,7 @@ class ECG_Rendered_Multilead_Dataset(Dataset):
         else:
             ECG_Data=self.ECG_Data_init[idx]
             image_data=draw_ECG_multilead_vanilla_ver2(ECG_Data[0], self.canvas,to_plot=False)
+            # print(f'Size of canvas is : {np.shape(image_data)}')
             if self.apply_perspective_transformation:
                 image_size_before_rendering=np.shape(image_data)
                 image_data=Perspective_transformation_application(image_data,database_path=self.root_dir,realtime_rendering=True)
@@ -113,6 +114,8 @@ class ECG_Rendered_Multilead_Dataset(Dataset):
                     #image_data=image_data[size_diff[0]//2:-size_diff[0]//2,size_diff[1]//2:-size_diff[1]//2,[2,1,0]]
                     image_data=cv2.resize(image_data,None,fx=image_size_before_rendering[0]/image_size_after_rendering[0], fy=image_size_before_rendering[1]/image_size_after_rendering[1], interpolation = cv2.INTER_AREA)
             image_data=image_data[:,:,[2,1,0]]
+            # print(f'Size of canvas is : {np.shape(image_data)}')
+
             sample=(image_data,self.classification_data[idx])
             return sample
 

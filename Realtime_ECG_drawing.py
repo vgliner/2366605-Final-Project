@@ -37,11 +37,19 @@ def draw_long_lead(canvas, long_lead, pivot, line_width,pixels_to_mv,pixels_to_s
     return canvas
 
 
-def draw_short_leads(canvas, short_leads, pivot_arr, line_width,pixels_to_mv,pixels_to_sec):
+def draw_short_leads(canvas, short_leads, pivot_arr, line_width,pixels_to_mv,pixels_to_sec,is_scaling_applied=False):
     scaling_factor=10
     downsample_factor=int(pixels_to_sec*2.5)
     f=[]
     # downsampling:
+    # TODO: Temporary scaling- to debug and remove
+    if is_scaling_applied:
+        for lead_num,lead in enumerate(short_leads):
+            if (max(lead)-min(lead))<0.05:
+                continue
+            offs=lead[0]
+            short_leads[lead_num]/=(max(lead)-min(lead))
+            short_leads[lead_num]-=short_leads[lead_num][0]-offs
     for lead_num in range(12):
         f.append((signal.resample(short_leads[lead_num]*pixels_to_mv*scaling_factor, downsample_factor)+pivot_arr[lead_num//4]-pixels_to_mv*5).astype(int))        
         if (lead_num%4==0):
@@ -69,6 +77,7 @@ def draw_ECG_multilead_vanilla_ver2(ECG_Data, canvas, to_plot=False):
     
     new_canvas=canvas[:,300:].copy()
     canvas_dims=np.shape(new_canvas)
+    is_scaling_applied=True
 
 
 
@@ -83,7 +92,7 @@ def draw_ECG_multilead_vanilla_ver2(ECG_Data, canvas, to_plot=False):
     # draw_canvas(new_canvas)
     new_canvas=draw_long_lead(new_canvas, ECG_Data[1], calibration_signal_pivots, line_width,pixels_to_mv,pixels_to_sec)
     # draw_canvas(new_canvas)
-    new_canvas=draw_short_leads(new_canvas, ECG_Data[0], calibration_signal_pivots, line_width,pixels_to_mv,pixels_to_sec)
+    new_canvas=draw_short_leads(new_canvas, ECG_Data[0], calibration_signal_pivots, line_width,pixels_to_mv,pixels_to_sec,is_scaling_applied)
     # draw_canvas(new_canvas)
 
     if to_plot:
